@@ -11,7 +11,7 @@ interface AlbumPageProps {
 const AlbumPage: React.FC<AlbumPageProps> = ({ page, isRightPage = false }) => {
   return (
     <div 
-      className={`h-full w-full relative bg-neutral-50 ${isRightPage ? 'bg-page-texture bg-cover bg-opacity-5' : ''} overflow-hidden`}
+      className={`h-full mb-5 w-full relative bg-neutral-50 ${isRightPage ? 'bg-page-texture bg-cover bg-opacity-5' : ''} overflow-hidden`}
     >
       <motion.div 
         initial={{ opacity: 0 }}

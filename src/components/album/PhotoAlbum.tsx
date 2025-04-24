@@ -22,38 +22,52 @@ const PhotoAlbum: React.FC = () => {
 
   useKeyboardNavigation();
 
+  // Attempt orientation lock when in fullscreen
   useEffect(() => {
     const lockOrientation = async () => {
-      if (width < 768) {
+      if (width < 768 && isFullscreen) {
         try {
           if (screen.orientation && (screen.orientation as any).lock) {
             await (screen.orientation as any).lock('landscape');
           }
-        } catch {
-          console.log('Orientation lock not supported');
+        } catch (err) {
+          console.log('Orientation lock not supported or permission denied');
         }
       }
     };
 
     lockOrientation();
+  }, [width, isFullscreen]);
 
+  // Handle portrait orientation warning
+  useEffect(() => {
     const handleOrientationChange = () => {
-      if (width < 768 && window.orientation !== 90 && window.orientation !== -90) {
-        const message = document.createElement('div');
-        message.className = 'fixed inset-0 bg-black text-white flex items-center justify-center z-50 text-center p-4';
-        message.innerHTML = 'Please rotate your device to landscape mode for the best experience';
-        document.body.appendChild(message);
+      const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+      const existingMessage = document.getElementById("rotate-message");
+
+      if (width < 768 && isPortrait) {
+        if (!existingMessage) {
+          const message = document.createElement('div');
+          message.id = 'rotate-message';
+          message.className = 'fixed inset-0 bg-black bg-opacity-90 text-white text-lg flex items-center justify-center z-50 text-center p-6';
+          message.innerHTML = 'Please rotate your device to landscape mode for the best experience';
+          document.body.appendChild(message);
+        }
       } else {
-        const message = document.querySelector('.fixed.inset-0.bg-black');
-        if (message) message.remove();
+        if (existingMessage) {
+          existingMessage.remove();
+        }
       }
     };
 
     window.addEventListener('orientationchange', handleOrientationChange);
+    window.addEventListener('resize', handleOrientationChange); // Also trigger on resize
+
     handleOrientationChange();
 
     return () => {
       window.removeEventListener('orientationchange', handleOrientationChange);
+      window.removeEventListener('resize', handleOrientationChange);
     };
   }, [width]);
 
@@ -87,11 +101,11 @@ const PhotoAlbum: React.FC = () => {
   const { width: bookWidth, height: bookHeight } = getBookSize();
 
   return (
-    <div 
-      ref={albumRef} 
+    <div
+      ref={albumRef}
       className={`w-full h-full flex items-center justify-center bg-neutral-100 overflow-hidden ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}
     >
-      <div 
+      <div
         ref={containerRef}
         className="w-full h-full flex items-center justify-center p-0 m-0"
       >
@@ -110,6 +124,7 @@ const PhotoAlbum: React.FC = () => {
             mobileScrollSupport={true}
             onFlip={handlePageFlip}
             className="album-flipbook"
+            style={{ margin: '0 auto' }}
             startPage={currentPage}
             drawShadow={true}
             flippingTime={1000}
@@ -118,7 +133,6 @@ const PhotoAlbum: React.FC = () => {
             autoSize={true}
             showPageCorners={true}
             disableFlipByClick={false}
-            style={{}}
             clickEventForward={true}
             useMouseEvents={true}
             swipeDistance={30}
@@ -134,12 +148,12 @@ const PhotoAlbum: React.FC = () => {
             ))}
           </HTMLFlipBook>
         </div>
-        
-        <AlbumControls 
-          onToggleFullscreen={toggleFullscreen} 
-          isFullscreen={isFullscreen} 
+
+        <AlbumControls
+          onToggleFullscreen={toggleFullscreen}
+          isFullscreen={isFullscreen}
         />
-        
+
         <PageThumbnails />
       </div>
     </div>
