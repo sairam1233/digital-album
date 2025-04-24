@@ -9,7 +9,7 @@ import { useKeyboardNavigation } from '../../hooks/useKeyboardNavigation';
 import { useFullscreen } from '../../hooks/useFullscreen';
 import { useElementSize } from '../../hooks/useElementSize';
 import useSound from 'use-sound';
-import "./index.css";
+import './index.css';
 
 const PhotoAlbum: React.FC = () => {
   const { album, currentPage, setCurrentPage } = useAlbumStore();
@@ -18,11 +18,21 @@ const PhotoAlbum: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { width } = useElementSize(containerRef);
   const { isFullscreen, toggleFullscreen } = useFullscreen(albumRef);
-  const [playFlipSound] = useSound('https://assets.mixkit.co/sfx/preview/mixkit-light-page-turn-1337.mp3', { volume: 0.5 });
+  const [playFlipSound] = useSound('/page-flip-01a.mp3', { volume: 0.5, interrupt: true });
 
   useKeyboardNavigation();
 
-  // Attempt orientation lock when in fullscreen
+  // Unlock audio on first user click
+  useEffect(() => {
+    const unlockAudio = () => {
+      playFlipSound();
+      window.removeEventListener('click', unlockAudio);
+    };
+    window.addEventListener('click', unlockAudio);
+    return () => window.removeEventListener('click', unlockAudio);
+  }, [playFlipSound]);
+
+  // Lock orientation in fullscreen on mobile
   useEffect(() => {
     const lockOrientation = async () => {
       if (width < 768 && isFullscreen) {
@@ -35,15 +45,14 @@ const PhotoAlbum: React.FC = () => {
         }
       }
     };
-
     lockOrientation();
   }, [width, isFullscreen]);
 
-  // Handle portrait orientation warning
+  // Portrait mode warning
   useEffect(() => {
     const handleOrientationChange = () => {
-      const isPortrait = window.matchMedia("(orientation: portrait)").matches;
-      const existingMessage = document.getElementById("rotate-message");
+      const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+      const existingMessage = document.getElementById('rotate-message');
 
       if (width < 768 && isPortrait) {
         if (!existingMessage) {
@@ -53,16 +62,13 @@ const PhotoAlbum: React.FC = () => {
           message.innerHTML = 'Please rotate your device to landscape mode for the best experience. After that refresh the page.';
           document.body.appendChild(message);
         }
-      } else {
-        if (existingMessage) {
-          existingMessage.remove();
-        }
+      } else if (existingMessage) {
+        existingMessage.remove();
       }
     };
 
     window.addEventListener('orientationchange', handleOrientationChange);
-    window.addEventListener('resize', handleOrientationChange); // Also trigger on resize
-
+    window.addEventListener('resize', handleOrientationChange);
     handleOrientationChange();
 
     return () => {
@@ -78,7 +84,8 @@ const PhotoAlbum: React.FC = () => {
   }, [currentPage]);
 
   const handlePageFlip = (e: any) => {
-    playFlipSound();
+    console.log('Page flipped to:', e.data); // debug log
+    setTimeout(() => playFlipSound(), 150); // play with slight delay for sync
     setCurrentPage(e.data);
   };
 
