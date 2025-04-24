@@ -50,7 +50,7 @@ const PhotoAlbum: React.FC = () => {
           const message = document.createElement('div');
           message.id = 'rotate-message';
           message.className = 'fixed inset-0 bg-black bg-opacity-90 text-white text-lg flex items-center justify-center z-50 text-center p-6';
-          message.innerHTML = 'Please rotate your device to landscape mode for the best experience';
+          message.innerHTML = 'Please rotate your device to landscape mode for the best experience.After that refresh the page.';
           document.body.appendChild(message);
         }
       } else {
