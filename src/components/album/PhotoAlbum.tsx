@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react'; 
 import HTMLFlipBook from 'react-pageflip';
 import { useAlbumStore } from '../../store/albumStore';
 import AlbumCover from './AlbumCover';
@@ -22,7 +22,6 @@ const PhotoAlbum: React.FC = () => {
 
   useKeyboardNavigation();
 
-  // Unlock audio on first user click
   useEffect(() => {
     const unlockAudio = () => {
       playFlipSound();
@@ -32,51 +31,6 @@ const PhotoAlbum: React.FC = () => {
     return () => window.removeEventListener('click', unlockAudio);
   }, [playFlipSound]);
 
-  // Lock orientation in fullscreen on mobile
-  useEffect(() => {
-    const lockOrientation = async () => {
-      if (width < 768 && isFullscreen) {
-        try {
-          if (screen.orientation && (screen.orientation as any).lock) {
-            await (screen.orientation as any).lock('landscape');
-          }
-        } catch (err) {
-          console.log('Orientation lock not supported or permission denied');
-        }
-      }
-    };
-    lockOrientation();
-  }, [width, isFullscreen]);
-
-  // Portrait mode warning
-  useEffect(() => {
-    const handleOrientationChange = () => {
-      const isPortrait = window.matchMedia('(orientation: portrait)').matches;
-      const existingMessage = document.getElementById('rotate-message');
-
-      if (width < 768 && isPortrait) {
-        if (!existingMessage) {
-          const message = document.createElement('div');
-          message.id = 'rotate-message';
-          message.className = 'fixed inset-0 bg-black bg-opacity-90 text-white text-lg flex items-center justify-center z-50 text-center p-6';
-          message.innerHTML = 'Please rotate your device to landscape mode for the best experience. After that refresh the page.';
-          document.body.appendChild(message);
-        }
-      } else if (existingMessage) {
-        existingMessage.remove();
-      }
-    };
-
-    window.addEventListener('orientationchange', handleOrientationChange);
-    window.addEventListener('resize', handleOrientationChange);
-    handleOrientationChange();
-
-    return () => {
-      window.removeEventListener('orientationchange', handleOrientationChange);
-      window.removeEventListener('resize', handleOrientationChange);
-    };
-  }, [width]);
-
   useEffect(() => {
     if (flipBookRef.current && flipBookRef.current.pageFlip()) {
       flipBookRef.current.pageFlip().turnToPage(currentPage);
@@ -84,8 +38,8 @@ const PhotoAlbum: React.FC = () => {
   }, [currentPage]);
 
   const handlePageFlip = (e: any) => {
-    console.log('Page flipped to:', e.data); // debug log
-    setTimeout(() => playFlipSound(), 150); // play with slight delay for sync
+    console.log('Page flipped to:', e.data);
+    setTimeout(() => playFlipSound(), 150);
     setCurrentPage(e.data);
   };
 
