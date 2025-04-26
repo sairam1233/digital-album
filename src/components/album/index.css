@@ -2,3 +2,11 @@
     transition: transform 0.3s ease-in-out;
   }
   
+
+@media (max-width: 767px) and (orientation: portrait) {
+    .auto-rotate-mobile {
+      transform: rotate(180deg);
+      transform-origin: center;
+    }
+  }
+  

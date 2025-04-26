@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react'; 
+import React, { useRef, useEffect } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import { useAlbumStore } from '../../store/albumStore';
 import AlbumCover from './AlbumCover';
@@ -22,6 +22,7 @@ const PhotoAlbum: React.FC = () => {
 
   useKeyboardNavigation();
 
+  // Unlock audio on first user click
   useEffect(() => {
     const unlockAudio = () => {
       playFlipSound();
@@ -30,6 +31,22 @@ const PhotoAlbum: React.FC = () => {
     window.addEventListener('click', unlockAudio);
     return () => window.removeEventListener('click', unlockAudio);
   }, [playFlipSound]);
+
+  // Lock orientation in fullscreen on mobile
+  useEffect(() => {
+    const lockOrientation = async () => {
+      if (width < 768 && isFullscreen) {
+        try {
+          if (screen.orientation && (screen.orientation as any).lock) {
+            await (screen.orientation as any).lock('landscape');
+          }
+        } catch (err) {
+          console.log('Orientation lock not supported or permission denied');
+        }
+      }
+    };
+    lockOrientation();
+  }, [width, isFullscreen]);
 
   useEffect(() => {
     if (flipBookRef.current && flipBookRef.current.pageFlip()) {
@@ -64,7 +81,7 @@ const PhotoAlbum: React.FC = () => {
   return (
     <div
       ref={albumRef}
-      className={`w-full h-full flex items-center justify-center bg-neutral-100 overflow-hidden ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}
+      className={`w-full h-full flex items-center justify-center bg-neutral-100 overflow-hidden ${isFullscreen ? 'fixed inset-0 z-50' : ''} auto-rotate-mobile`}
     >
       <div
         ref={containerRef}
