@@ -87,18 +87,3 @@ body {
   animation: pageLoading 1.5s infinite;
 }
 
-@media only screen and (max-width: 640px) {
-  .rotate-mobile {
-    transform: rotate(180deg);
-    transform-origin: center center;
-    width: 100vw;
-    height: 100vh;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-
-  body {
-    overflow: hidden;
-  }
-}
